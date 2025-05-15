@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DentManager - Dental Practice Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        'primary-dark': '#4A49B0',
+                        'primary-light': '#7E7DE5',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-in-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-200">
+    <!-- Check for dark mode -->
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 flex items-center">
+                            <i class="fas fa-tooth text-primary dark:text-primary-light text-2xl mr-2"></i>
+                            <span class="text-xl font-bold">DentManager</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <button id="toggleSidebar" class="md:hidden rounded-md p-2 inline-flex items-center justify-center text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 flex">
+            <!-- Sidebar Navigation -->
+            <aside id="sidebar" class="hidden md:flex flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+                <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+                    <nav class="flex-1 px-2 space-y-1">
+                        <button data-view="dashboard" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium rounded-md bg-primary bg-opacity-10 text-primary dark:text-primary-light">
+                            <i class="fas fa-chart-line mr-3"></i>
+                            Dashboard
+                        </button>
+                        <button data-view="patients" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fas fa-user-friends mr-3"></i>
+                            Patients
+                        </button>
+                        <button data-view="appointments" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fas fa-calendar-alt mr-3"></i>
+                            Appointments
+                        </button>
+                        <button data-view="treatments" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fas fa-procedures mr-3"></i>
+                            Treatments
+                        </button>
+                    </nav>
+                </div>
+                <div class="border-t border-gray-200 dark:border-gray-700 p-4">
+                    <button id="toggleDarkMode" class="flex items-center text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light">
+                        <i class="fas fa-moon dark:hidden mr-2"></i>
+                        <i class="fas fa-sun hidden dark:inline-block mr-2"></i>
+                        <span class="dark:hidden">Dark Mode</span>
+                        <span class="hidden dark:inline-block">Light Mode</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Mobile menu -->
+            <div id="mobileMenu" class="hidden fixed inset-0 z-40">
+                <div class="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
+                <div class="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-gray-800">
+                    <div class="absolute top-0 right-0 pt-2">
+                        <button id="closeMobileMenu" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none">
+                            <i class="fas fa-times text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                    </div>
+                    <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+                        <div class="flex-shrink-0 flex items-center px-4">
+                            <i class="fas fa-tooth text-primary text-2xl mr-2"></i>
+                            <span class="text-xl font-bold">DentManager</span>
+                        </div>
+                        <nav class="mt-5 px-2 space-y-1">
+                            <button data-view="dashboard" class="mobile-nav-item w-full flex items-center px-4 py-3 text-sm font-medium rounded-md bg-primary bg-opacity-10 text-primary dark:text-primary-light">
+                                <i class="fas fa-chart-line mr-3"></i>
+                                Dashboard
+                            </button>
+                            <button data-view="patients" class="mobile-nav-item w-full flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-user-friends mr-3"></i>
+                                Patients
+                            </button>
+                            <button data-view="appointments" class="mobile-nav-item w-full flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-calendar-alt mr-3"></i>
+                                Appointments
+                            </button>
+                            <button data-view="treatments" class="mobile-nav-item w-full flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-procedures mr-3"></i>
+                                Treatments
+                            </button>
+                        </nav>
+                    </div>
+                    <div class="border-t border-gray-200 dark:border-gray-700 p-4">
+                        <button id="mobileToggleDarkMode" class="flex items-center text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light">
+                            <i class="fas fa-moon dark:hidden mr-2"></i>
+                            <i class="fas fa-sun hidden dark:inline-block mr-2"></i>
+                            <span class="dark:hidden">Dark Mode</span>
+                            <span class="hidden dark:inline-block">Light Mode</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 w-14"></div>
+            </div>
+
+            <!-- Main content -->
+            <main class="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
+                <div id="contentArea" class="max-w-7xl mx-auto">
+                    <!-- Dashboard content -->
+                    <div id="dashboard-view" class="view-content fade-in">
+                        <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <!-- Stats cards -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 slide-in">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900 mr-4">
+                                        <i class="fas fa-user-friends text-blue-500 dark:text-blue-300"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Patients</p>
+                                        <p class="text-2xl font-semibold" id="patientCount">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 slide-in" style="animation-delay: 0.1s">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-green-100 dark:bg-green-900 mr-4">
+                                        <i class="fas fa-calendar-check text-green-500 dark:text-green-300"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Today's Appointments</p>
+                                        <p class="text-2xl font-semibold" id="todayAppointments">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 slide-in" style="animation-delay: 0.2s">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900 mr-4">
+                                        <i class="fas fa-clipboard-list text-purple-500 dark:text-purple-300"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Treatments</p>
+                                        <p class="text-2xl font-semibold" id="pendingTreatments">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent appointments -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                <h2 class="text-lg font-medium">Recent Appointments</h2>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Patient</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Treatment</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentAppointmentsList" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" colspan="5">No appointments found</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Patients content -->
+                    <div id="patients-view" class="view-content hidden fade-in">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                            <h1 class="text-2xl font-bold">Patients</h1>
+                            <button id="addPatientBtn" class="mt-3 md:mt-0 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md flex items-center transition-colors">
+                                <i class="fas fa-plus mr-2"></i> Add New Patient
+                            </button>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <input type="text" id="patientSearch" placeholder="Search patients..." class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base">
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Phone</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Next Appointment</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="patientsList" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" colspan="5">No patients found</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Appointments content -->
+                    <div id="appointments-view" class="view-content hidden fade-in">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                            <h1 class="text-2xl font-bold">Appointments</h1>
+                            <button id="addAppointmentBtn" class="mt-3 md:mt-0 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md flex items-center transition-colors">
+                                <i class="fas fa-plus mr-2"></i> Schedule Appointment
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 mb-6">
+                            <div class="lg:col-span-5">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <button id="prevDate" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <h2 id="currentDate" class="text-lg font-medium"></h2>
+                                        <button id="nextDate" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                    <div id="appointmentTimeline" class="flex flex-col space-y-2 mt-4">
+                                        <!-- Appointment slots will be dynamically added here -->
+                                        <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                                            No appointments scheduled for this day
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="lg:col-span-2">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                                    <h3 class="font-medium mb-3">Upcoming Appointments</h3>
+                                    <div id="upcomingAppointments" class="space-y-3">
+                                        <!-- Upcoming appointments will be dynamically added here -->
+                                        <div class="text-gray-500 dark:text-gray-400">
+                                            No upcoming appointments
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Treatments content -->
+                    <div id="treatments-view" class="view-content hidden fade-in">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                            <h1 class="text-2xl font-bold">Treatments</h1>
+                            <button id="addTreatmentBtn" class="mt-3 md:mt-0 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md flex items-center transition-colors">
+                                <i class="fas fa-plus mr-2"></i> Add Treatment
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                            <!-- Treatment cards will be added here -->
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                <h2 class="text-lg font-medium">Treatment List</h2>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Treatment</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Duration</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="treatmentsList" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" colspan="5">No treatments found</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Patient Modal -->
+    <div id="addPatientModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-full overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium" id="patientModalTitle">Add New Patient</h3>
+                </div>
+                <form id="patientForm" class="p-6">
+                    <input type="hidden" id="patientId">
+                    <div class="mb-4">
+                        <label for="patientName" class="block mb-2 text-sm font-medium">Full Name</label>
+                        <input type="text" id="patientName" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="patientPhone" class="block mb-2 text-sm font-medium">Phone Number</label>
+                        <input type="tel" id="patientPhone" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="patientEmail" class="block mb-2 text-sm font-medium">Email</label>
+                        <input type="email" id="patientEmail" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="patientDOB" class="block mb-2 text-sm font-medium">Date of Birth</label>
+                        <input type="date" id="patientDOB" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base">
+                    </div>
+                    <div class="mb-4">
+                        <label for="patientAddress" class="block mb-2 text-sm font-medium">Address</label>
+                        <textarea id="patientAddress" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" rows="2"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="patientNotes" class="block mb-2 text-sm font-medium">Medical Notes</label>
+                        <textarea id="patientNotes" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" rows="3"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 cancel-modal">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md">Save Patient</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Appointment Modal -->
+    <div id="addAppointmentModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-full overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium" id="appointmentModalTitle">Schedule Appointment</h3>
+                </div>
+                <form id="appointmentForm" class="p-6">
+                    <input type="hidden" id="appointmentId">
+                    <div class="mb-4">
+                        <label for="appointmentPatient" class="block mb-2 text-sm font-medium">Patient</label>
+                        <select id="appointmentPatient" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" required>
+                            <option value="">Select a patient</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="appointmentDate" class="block mb-2 text-sm font-medium">Date</label>
+                        <input type="date" id="appointmentDate" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="appointmentTime" class="block mb-2 text-sm font-medium">Time</label>
+                        <input type="time" id="appointmentTime" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="appointmentDuration" class="block mb-2 text-sm font-medium">Duration (minutes)</label>
+                        <input type="number" id="appointmentDuration" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" value="30" min="15" step="15" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="appointmentTreatment" class="block mb-2 text-sm font-medium">Treatment</label>
+                        <select id="appointmentTreatment" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base">
+                            <option value="">Select a treatment</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="appointmentNotes" class="block mb-2 text-sm font-medium">Notes</label>
+                        <textarea id="appointmentNotes" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" rows="3"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 cancel-modal">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md">Save Appointment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Treatment Modal -->
+    <div id="addTreatmentModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-full overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium" id="treatmentModalTitle">Add Treatment</h3>
+                </div>
+                <form id="treatmentForm" class="p-6">
+                    <input type="hidden" id="treatmentId">
+                    <div class="mb-4">
+                        <label for="treatmentName" class="block mb-2 text-sm font-medium">Treatment Name</label>
+                        <input type="text" id="treatmentName" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="treatmentDuration" class="block mb-2 text-sm font-medium">Duration (minutes)</label>
+                        <input type="number" id="treatmentDuration" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" min="15" step="15" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="treatmentPrice" class="block mb-2 text-sm font-medium">Price</label>
+                        <input type="number" id="treatmentPrice" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="treatmentDescription" class="block mb-2 text-sm font-medium">Description</label>
+                        <textarea id="treatmentDescription" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base" rows="3"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 cancel-modal">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md">Save Treatment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Patient Details Modal -->
+    <div id="viewPatientModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-full overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h3 class="text-lg font-medium" id="viewPatientName">Patient Details</h3>
+                    <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 cancel-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Contact Information</h4>
+                            <div class="mb-4">
+                                <p class="text-sm"><strong>Phone:</strong> <span id="viewPatientPhone"></span></p>
+                                <p class="text-sm"><strong>Email:</strong> <span id="viewPatientEmail"></span></p>
+                                <p class="text-sm"><strong>Address:</strong> <span id="viewPatientAddress"></span></p>
+                            </div>
+                            
+                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Personal Information</h4>
+                            <div class="mb-4">
+                                <p class="text-sm"><strong>Date of Birth:</strong> <span id="viewPatientDOB"></span></p>
+                            </div>
+                            
+                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Medical Notes</h4>
+                            <div class="mb-4">
+                                <p class="text-sm" id="viewPatientNotes"></p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Appointment History</h4>
+                            <div id="viewPatientAppointments" class="mb-4 max-h-60 overflow-y-auto">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">No appointment history</p>
+                            </div>
+                            
+                            <div class="mt-6 flex space-x-3">
+                                <button id="editViewedPatient" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md">
+                                    <i class="fas fa-edit mr-2"></i> Edit Patient
+                                </button>
+                                <button id="scheduleForViewedPatient" class="px-4 py-2 border border-primary text-primary dark:border-primary-light dark:text-primary-light hover:bg-primary hover:text-white dark:hover:bg-primary-dark rounded-md">
+                                    <i class="fas fa-calendar-plus mr-2"></i> Schedule Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium" id="deleteModalTitle">Confirm Delete</h3>
+                </div>
+                <div class="p-6">
+                    <p id="deleteModalMessage">Are you sure you want to delete this item? This action cannot be undone.</p>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 cancel-modal">Cancel</button>
+                        <button type="button" id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="fixed bottom-4 right-4 px-6 py-3 bg-white dark:bg-gray-800 rounded-md shadow-lg transform transition-transform duration-300 translate-y-full hidden">
+        <div class="flex items-center">
+            <i id="notificationIcon" class="mr-2"></i>
+            <span id="notificationMessage"></span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sample data for demo purposes
+            const sampleData = {
+                patients: [
+                    { id: 1, name: 'John Smith', phone: '555-123-4567', email: 'john.smith@example.com', dob: '1985-06-15', address: '123 Main St, Anytown, USA', notes: 'Allergic to penicillin' },
+                    { id: 2, name: 'Sarah Johnson', phone: '555-987-6543', email: 'sarah.j@example.com', dob: '1990-11-22', address: '456 Oak Ave, Somewhere, USA', notes: 'Has dental anxiety, prefers early appointments' },
+                    { id: 3, name: 'Michael Brown', phone: '555-456-7890', email: 'mbrown@example.com', dob: '1978-03-04', address: '789 Pine Rd, Elsewhere, USA', notes: 'High blood pressure' }
+                ],
+                appointments: [
+                    { id: 1, patientId: 1, date: '2023-09-15', time: '09:00', duration: 30, treatmentId: 1, notes: 'Regular checkup and cleaning' },
+                    { id: 2, patientId: 2, date: '2023-09-15', time: '11:30', duration: 60, treatmentId: 2, notes: 'Cavity filling on upper right molar' },
+                    { id: 3, patientId: 3, date: '2023-09-16', time: '14:00', duration: 45, treatmentId: 3, notes: 'Consultation for teeth whitening' }
+                ],
+                treatments: [
+                    { id: 1, name: 'Regular Cleaning', duration: 30, price: 75.00, description: 'Standard dental cleaning and examination' },
+                    { id: 2, name: 'Cavity Filling', duration: 60, price: 150.00, description: 'Filling for small to medium cavities' },
+                    { id: 3, name: 'Teeth Whitening', duration: 45, price: 250.00, description: 'Professional teeth whitening treatment' },
+                    { id: 4, name: 'Root Canal', duration: 90, price: 800.00, description: 'Root canal treatment for infected teeth' }
+                ]
+            };
+
+            // State management
+            let state = {
+                patients: JSON.parse(JSON.stringify(sampleData.patients)),
+                appointments: JSON.parse(JSON.stringify(sampleData.appointments)),
+                treatments: JSON.parse(JSON.stringify(sampleData.treatments)),
+                currentView: 'dashboard',
+                currentDate: new Date(),
+                editingId: null
+            };
+
+            // Initialize the dashboard stats
+            updateDashboardStats();
+
+            // Initialize current date display
+            updateCurrentDateDisplay();
+
+            // Initialize the patient list
+            renderPatientList();
+
+            // Initialize the appointments timeline
+            renderAppointmentTimeline();
+
+            // Initialize treatments list
+            renderTreatmentsList();
+
+            // Populate any dropdowns
+            populatePatientDropdown();
+            populateTreatmentDropdown();
+
+            // Navigation handling
+            document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const view = this.dataset.view;
+                    switchView(view);
+                    
+                    // Close mobile menu if open
+                    document.getElementById('mobileMenu').classList.add('hidden');
+                });
+            });
+
+            function switchView(view) {
+                document.querySelectorAll('.view-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(`${view}-view`).classList.remove('hidden');
+                
+                document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
+                    if (item.dataset.view === view) {
+                        item.classList.add('bg-primary', 'bg-opacity-10', 'text-primary', 'dark:text-primary-light');
+                        item.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+                    } else {
+                        item.classList.remove('bg-primary', 'bg-opacity-10', 'text-primary', 'dark:text-primary-light');
+                        item.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+                    }
+                });
+                
+                state.currentView = view;
+            }
+
+            // Toggle dark mode
+            document.getElementById('toggleDarkMode').addEventListener('click', function() {
+                document.documentElement.classList.toggle('dark');
+            });
+
+            document.getElementById('mobileToggleDarkMode').addEventListener('click', function() {
+                document.documentElement.classList.toggle('dark');
+            });
+
+            // Mobile menu toggle
+            document.getElementById('toggleSidebar').addEventListener('click', function() {
+                document.getElementById('mobileMenu').classList.remove('hidden');
+            });
+
+            document.getElementById('closeMobileMenu').addEventListener('click', function() {
+                document.getElementById('mobileMenu').classList.add('hidden');
+            });
+
+            // Modal functionality
+            document.getElementById('addPatientBtn').addEventListener('click', function() {
+                openPatientModal();
+            });
+
+            document.getElementById('addAppointmentBtn').addEventListener('click', function() {
+                openAppointmentModal();
+            });
+
+            document.getElementById('addTreatmentBtn').addEventListener('click', function() {
+                openTreatmentModal();
+            });
+
+            document.querySelectorAll('.cancel-modal').forEach(button => {
+                button.addEventListener('click', function() {
+                    closeAllModals();
+                });
+            });
+
+            // Form submissions
+            document.getElementById('patientForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                savePatient();
+            });
+
+            document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveAppointment();
+            });
+
+            document.getElementById('treatmentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveTreatment();
+            });
+
+            // Date navigation
+            document.getElementById('prevDate').addEventListener('click', function() {
+                const newDate = new Date(state.currentDate);
+                newDate.setDate(newDate.getDate() - 1);
+                state.currentDate = newDate;
+                updateCurrentDateDisplay();
+                renderAppointmentTimeline();
+            });
+
+            document.getElementById('nextDate').addEventListener('click', function() {
+                const newDate = new Date(state.currentDate);
+                newDate.setDate(newDate.getDate() + 1);
+                state.currentDate = newDate;
+                updateCurrentDateDisplay();
+                renderAppointmentTimeline();
+            });
+
+            // Patient search functionality
+            document.getElementById('patientSearch').addEventListener('input', function() {
+                renderPatientList(this.value);
+            });
+
+            // Connect modals
+            document.getElementById('editViewedPatient').addEventListener('click', function() {
+                const patientId = document.getElementById('viewPatientName').dataset.patientId;
+                if (patientId) {
+                    closeAllModals();
+                    openPatientModal(parseInt(patientId));
+                }
+            });
+
+            document.getElementById('scheduleForViewedPatient').addEventListener('click', function() {
+                const patientId = document.getElementById('viewPatientName').dataset.patientId;
+                if (patientId) {
+                    closeAllModals();
+                    openAppointmentModal(null, parseInt(patientId));
+                }
+            });
+
+            // Functions
+            function updateDashboardStats() {
+                document.getElementById('patientCount').textContent = state.patients.length;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const todayAppointments = state.appointments.filter(apt => apt.date === today);
+                document.getElementById('todayAppointments').textContent = todayAppointments.length;
+                
+                // For demo purposes, just show a random number for pending treatments
+                document.getElementById('pendingTreatments').textContent = Math.floor(Math.random() * 10);
+                
+                renderRecentAppointments();
+            }
+
+            function renderRecentAppointments() {
+                const recentAppointmentsList = document.getElementById('recentAppointmentsList');
+                
+                // Sort appointments by date and time
+                const sortedAppointments = [...state.appointments].sort((a, b) => {
+                    return new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`);
+                });
+                
+                if (sortedAppointments.length === 0) {
+                    recentAppointmentsList.innerHTML = `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" colspan="5">No appointments found</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                recentAppointmentsList.innerHTML = sortedAppointments.slice(0, 5).map(apt => {
+                    const patient = state.patients.find(p => p.id === apt.patientId);
+                    const treatment = apt.treatmentId ? state.treatments.find(t => t.id === apt.treatmentId) : null;
+                    
+                    // Format date for display
+                    const aptDate = new Date(apt.date);
+                    const formattedDate = aptDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    
+                    // Check if appointment is today, past, or future
+                    const today = new Date().toISOString().split('T')[0];
+                    let status;
+                    if (apt.date < today) {
+                        status = `<span class="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Completed</span>`;
+                    } else if (apt.date === today) {
+                        status = `<span class="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">Today</span>`;
+                    } else {
+                        status = `<span class="px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">Upcoming</span>`;
+                    }
+                    
+                    return `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium">${patient ? patient.name : 'Unknown Patient'}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${formattedDate}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${formatTime(apt.time)}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${treatment ? treatment.name : 'Consultation'}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                ${status}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            function renderPatientList(searchTerm = '') {
+                const patientsList = document.getElementById('patientsList');
+                
+                let filteredPatients = state.patients;
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filteredPatients = state.patients.filter(patient => 
+                        patient.name.toLowerCase().includes(term) || 
+                        patient.email.toLowerCase().includes(term) || 
+                        patient.phone.includes(term)
+                    );
+                }
+                
+                if (filteredPatients.length === 0) {
+                    patientsList.innerHTML = `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" colspan="5">No patients found</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                patientsList.innerHTML = filteredPatients.map(patient => {
+                    // Find next appointment for this patient
+                    const today = new Date().toISOString().split('T')[0];
+                    const futureAppointments = state.appointments
+                        .filter(apt => apt.patientId === patient.id && apt.date >= today)
+                        .sort((a, b) => new Date(a.date) - new Date(b.date));
+                    
+                    let nextAppointment = 'No upcoming appointments';
+                    if (futureAppointments.length > 0) {
+                        const aptDate = new Date(futureAppointments[0].date);
+                        nextAppointment = `${aptDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${formatTime(futureAppointments[0].time)}`;
+                    }
+                    
+                    return `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium">${patient.name}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${patient.phone}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${patient.email}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${nextAppointment}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <button onclick="viewPatient(${patient.id})" class="text-primary dark:text-primary-light hover:text-primary-dark dark:hover:text-primary-light mr-3">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="editPatient(${patient.id})" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mr-3">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deletePatient(${patient.id})" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            function updateCurrentDateDisplay() {
+                const dateDisplay = document.getElementById('currentDate');
+                dateDisplay.textContent = state.currentDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
+            }
+
+            function renderAppointmentTimeline() {
+                const timeline = document.getElementById('appointmentTimeline');
+                const dateString = state.currentDate.toISOString().split('T')[0];
+                
+                const dayAppointments = state.appointments.filter(apt => apt.date === dateString);
+                
+                if (dayAppointments.length === 0) {
+                    timeline.innerHTML = `
+                        <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                            No appointments scheduled for this day
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Sort appointments by time
+                dayAppointments.sort((a, b) => a.time.localeCompare(b.time));
+                
+                timeline.innerHTML = dayAppointments.map(apt => {
+                    const patient = state.patients.find(p => p.id === apt.patientId);
+                    const treatment = apt.treatmentId ? state.treatments.find(t => t.id === apt.treatmentId) : null;
+                    
+                    return `
+                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex flex-col md:flex-row justify-between">
+                                <div>
+                                    <p class="font-medium">${formatTime(apt.time)} - ${formatTimeEnd(apt.time, apt.duration)}</p>
+                                    <p class="text-lg">${patient ? patient.name : 'Unknown Patient'}</p>
+                                    <p class="text-gray-500 dark:text-gray-400">
+                                        ${treatment ? treatment.name : 'Consultation'}
+                                        ${apt.notes ? `- ${apt.notes}` : ''}
+                                    </p>
+                                </div>
+                                <div class="flex space-x-2 mt-3 md:mt-0">
+                                    <button onclick="editAppointment(${apt.id})" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteAppointment(${apt.id})" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Also update the upcoming appointments sidebar
+                renderUpcomingAppointments();
+            }
+
+            function renderUpcomingAppointments() {
+                const upcomingContainer = document.getElementById('upcomingAppointments');
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Get future appointments
+                const futureAppointments = state.appointments
+                    .filter(apt => apt.date >= today)
+                    .sort((a, b) => {
+                        return new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`);
+                    })
+                    .slice(0, 5); // Only show the next 5 appointments
+                
+                if (futureAppointments.length === 0) {
+                    upcomingContainer.innerHTML = `
+                        <div class="text-gray-500 dark:text-gray-400">
+                            No upcoming appointments
+                        </div>
+                    `;
+                    return;
+                }
+                
+                upcomingContainer.innerHTML = futureAppointments.map(apt => {
+                    const patient = state.patients.find(p => p.id === apt.patientId);
+                    const aptDate = new Date(apt.date);
+                    const formattedDate = aptDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    
+                    // Check if it's today
+                    const isToday = apt.date === today;
+                    
+                    return `
+                        <div class="p-3 rounded-md ${isToday ? 'bg-green-50 dark:bg-green-900 dark:bg-opacity-20' : 'bg-gray-50 dark:bg-gray-700'}">
+                            <div class="flex justify-between">
+                                <p class="font-medium">${patient ? patient.name : 'Unknown Patient'}</p>
+                                <p class="text-sm ${isToday ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}">
+                                    ${isToday ? 'Today' : formattedDate}
+                                </p>
+                            </div>
+                            <p class="text-gray-500 dark:text-gray-400">${formatTime(apt.time)}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function renderTreatmentsList() {
+                const treatmentsList = document.getElementById('treatmentsList');
+                
+                if (state.treatments.length === 0) {
+                    treatmentsList.innerHTML = `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" colspan="5">No treatments found</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                treatmentsList.innerHTML = state.treatments.map(treatment => {
+                    return `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium">${treatment.name}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${treatment.duration} min</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">$${treatment.price.toFixed(2)}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${treatment.description || '-'}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <button onclick="editTreatment(${treatment.id})" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mr-3">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteTreatment(${treatment.id})" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            function populatePatientDropdown() {
+                const patientSelect = document.getElementById('appointmentPatient');
+                
+                // Clear existing options except the first one
+                while (patientSelect.options.length > 1) {
+                    patientSelect.remove(1);
+                }
+                
+                // Add patient options
+                state.patients.forEach(patient => {
+                    const option = document.createElement('option');
+                    option.value = patient.id;
+                    option.textContent = patient.name;
+                    patientSelect.appendChild(option);
+                });
+            }
+
+            function populateTreatmentDropdown() {
+                const treatmentSelect = document.getElementById('appointmentTreatment');
+                
+                // Clear existing options except the first one
+                while (treatmentSelect.options.length > 1) {
+                    treatmentSelect.remove(1);
+                }
+                
+                // Add treatment options
+                state.treatments.forEach(treatment => {
+                    const option = document.createElement('option');
+                    option.value = treatment.id;
+                    option.textContent = `${treatment.name} (${treatment.duration} min - $${treatment.price.toFixed(2)})`;
+                    treatmentSelect.appendChild(option);
+                });
+            }
+
+            function openPatientModal(patientId = null) {
+                const modal = document.getElementById('addPatientModal');
+                const modalTitle = document.getElementById('patientModalTitle');
+                const form = document.getElementById('patientForm');
+                
+                // Reset form
+                form.reset();
+                
+                if (patientId) {
+                    // Edit existing patient
+                    const patient = state.patients.find(p => p.id === patientId);
+                    if (patient) {
+                        modalTitle.textContent = 'Edit Patient';
+                        document.getElementById('patientId').value = patient.id;
+                        document.getElementById('patientName').value = patient.name;
+                        document.getElementById('patientPhone').value = patient.phone;
+                        document.getElementById('patientEmail').value = patient.email;
+                        document.getElementById('patientDOB').value = patient.dob || '';
+                        document.getElementById('patientAddress').value = patient.address || '';
+                        document.getElementById('patientNotes').value = patient.notes || '';
+                        state.editingId = patientId;
+                    }
+                } else {
+                    // Add new patient
+                    modalTitle.textContent = 'Add New Patient';
+                    document.getElementById('patientId').value = '';
+                    state.editingId = null;
+                }
+                
+                modal.classList.remove('hidden');
+            }
+
+            function openAppointmentModal(appointmentId = null, presetPatientId = null) {
+                const modal = document.getElementById('addAppointmentModal');
+                const modalTitle = document.getElementById('appointmentModalTitle');
+                const form = document.getElementById('appointmentForm');
+                
+                // Reset form
+                form.reset();
+                
+                // Set default date to today
+                document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
+                
+                if (appointmentId) {
+                    // Edit existing appointment
+                    const appointment = state.appointments.find(a => a.id === appointmentId);
+                    if (appointment) {
+                        modalTitle.textContent = 'Edit Appointment';
+                        document.getElementById('appointmentId').value = appointment.id;
+                        document.getElementById('appointmentPatient').value = appointment.patientId;
+                        document.getElementById('appointmentDate').value = appointment.date;
+                        document.getElementById('appointmentTime').value = appointment.time;
+                        document.getElementById('appointmentDuration').value = appointment.duration;
+                        document.getElementById('appointmentTreatment').value = appointment.treatmentId || '';
+                        document.getElementById('appointmentNotes').value = appointment.notes || '';
+                        state.editingId = appointmentId;
+                    }
+                } else {
+                    // Add new appointment
+                    modalTitle.textContent = 'Schedule Appointment';
+                    document.getElementById('appointmentId').value = '';
+                    state.editingId = null;
+                    
+                    // If a patient is pre-selected (e.g. from patient details)
+                    if (presetPatientId) {
+                        document.getElementById('appointmentPatient').value = presetPatientId;
+                    }
+                }
+                
+                modal.classList.remove('hidden');
+            }
+
+            function openTreatmentModal(treatmentId = null) {
+                const modal = document.getElementById('addTreatmentModal');
+                const modalTitle = document.getElementById('treatmentModalTitle');
+                const form = document.getElementById('treatmentForm');
+                
+                // Reset form
+                form.reset();
+                
+                if (treatmentId) {
+                    // Edit existing treatment
+                    const treatment = state.treatments.find(t => t.id === treatmentId);
+                    if (treatment) {
+                        modalTitle.textContent = 'Edit Treatment';
+                        document.getElementById('treatmentId').value = treatment.id;
+                        document.getElementById('treatmentName').value = treatment.name;
+                        document.getElementById('treatmentDuration').value = treatment.duration;
+                        document.getElementById('treatmentPrice').value = treatment.price;
+                        document.getElementById('treatmentDescription').value = treatment.description || '';
+                        state.editingId = treatmentId;
+                    }
+                } else {
+                    // Add new treatment
+                    modalTitle.textContent = 'Add Treatment';
+                    document.getElementById('treatmentId').value = '';
+                    document.getElementById('treatmentDuration').value = '30';
+                    state.editingId = null;
+                }
+                
+                modal.classList.remove('hidden');
+            }
+
+            function closeAllModals() {
+                document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+                state.editingId = null;
+            }
+
+            function savePatient() {
+                const id = document.getElementById('patientId').value;
+                const name = document.getElementById('patientName').value;
+                const phone = document.getElementById('patientPhone').value;
+                const email = document.getElementById('patientEmail').value;
+                const dob = document.getElementById('patientDOB').value;
+                const address = document.getElementById('patientAddress').value;
+                const notes = document.getElementById('patientNotes').value;
+                
+                if (id && state.editingId) {
+                    // Update existing patient
+                    const index = state.patients.findIndex(p => p.id === parseInt(id));
+                    if (index !== -1) {
+                        state.patients[index] = {
+                            ...state.patients[index],
+                            name,
+                            phone,
+                            email,
+                            dob,
+                            address,
+                            notes
+                        };
+                        showNotification('Patient updated successfully', 'success');
+                    }
+                } else {
+                    // Add new patient
+                    const newId = state.patients.length > 0 ? Math.max(...state.patients.map(p => p.id)) + 1 : 1;
+                    state.patients.push({
+                        id: newId,
+                        name,
+                        phone,
+                        email,
+                        dob,
+                        address,
+                        notes
+                    });
+                    showNotification('Patient added successfully', 'success');
+                }
+                
+                // Update UI
+                renderPatientList();
+                updateDashboardStats();
+                populatePatientDropdown();
+                closeAllModals();
+            }
+
+            function saveAppointment() {
+                const id = document.getElementById('appointmentId').value;
+                const patientId = parseInt(document.getElementById('appointmentPatient').value);
+                const date = document.getElementById('appointmentDate').value;
+                const time = document.getElementById('appointmentTime').value;
+                const duration = parseInt(document.getElementById('appointmentDuration').value);
+                const treatmentId = document.getElementById('appointmentTreatment').value ? 
+                    parseInt(document.getElementById('appointmentTreatment').value) : null;
+                const notes = document.getElementById('appointmentNotes').value;
+                
+                if (id && state.editingId) {
+                    // Update existing appointment
+                    const index = state.appointments.findIndex(a => a.id === parseInt(id));
+                    if (index !== -1) {
+                        state.appointments[index] = {
+                            ...state.appointments[index],
+                            patientId,
+                            date,
+                            time,
+                            duration,
+                            treatmentId,
+                            notes
+                        };
+                        showNotification('Appointment updated successfully', 'success');
+                    }
+                } else {
+                    // Add new appointment
+                    const newId = state.appointments.length > 0 ? Math.max(...state.appointments.map(a => a.id)) + 1 : 1;
+                    state.appointments.push({
+                        id: newId,
+                        patientId,
+                        date,
+                        time,
+                        duration,
+                        treatmentId,
+                        notes
+                    });
+                    showNotification('Appointment scheduled successfully', 'success');
+                }
+                
+                // Update UI
+                renderAppointmentTimeline();
+                updateDashboardStats();
+                closeAllModals();
+            }
+
+            function saveTreatment() {
+                const id = document.getElementById('treatmentId').value;
+                const name = document.getElementById('treatmentName').value;
+                const duration = parseInt(document.getElementById('treatmentDuration').value);
+                const price = parseFloat(document.getElementById('treatmentPrice').value);
+                const description = document.getElementById('treatmentDescription').value;
+                
+                if (id && state.editingId) {
+                    // Update existing treatment
+                    const index = state.treatments.findIndex(t => t.id === parseInt(id));
+                    if (index !== -1) {
+                        state.treatments[index] = {
+                            ...state.treatments[index],
+                            name,
+                            duration,
+                            price,
+                            description
+                        };
+                        showNotification('Treatment updated successfully', 'success');
+                    }
+                } else {
+                    // Add new treatment
+                    const newId = state.treatments.length > 0 ? Math.max(...state.treatments.map(t => t.id)) + 1 : 1;
+                    state.treatments.push({
+                        id: newId,
+                        name,
+                        duration,
+                        price,
+                        description
+                    });
+                    showNotification('Treatment added successfully', 'success');
+                }
+                
+                // Update UI
+                renderTreatmentsList();
+                populateTreatmentDropdown();
+                closeAllModals();
+            }
+
+            // Delete confirmation
+            window.deletePatient = function(patientId) {
+                openDeleteConfirmModal('patient', patientId);
+            };
+
+            window.deleteAppointment = function(appointmentId) {
+                openDeleteConfirmModal('appointment', appointmentId);
+            };
+
+            window.deleteTreatment = function(treatmentId) {
+                openDeleteConfirmModal('treatment', treatmentId);
+            };
+
+            function openDeleteConfirmModal(type, id) {
+                const modal = document.getElementById('deleteConfirmModal');
+                const modalTitle = document.getElementById('deleteModalTitle');
+                const modalMessage = document.getElementById('deleteModalMessage');
+                const confirmBtn = document.getElementById('confirmDeleteBtn');
+                
+                let message = '';
+                let title = '';
+                
+                switch (type) {
+                    case 'patient':
+                        const patient = state.patients.find(p => p.id === id);
+                        title = 'Delete Patient';
+                        message = `Are you sure you want to delete patient "${patient.name}"? This will also delete all appointments for this patient.`;
+                        break;
+                    case 'appointment':
+                        title = 'Delete Appointment';
+                        message = `Are you sure you want to delete this appointment? This action cannot be undone.`;
+                        break;
+                    case 'treatment':
+                        const treatment = state.treatments.find(t => t.id === id);
+                        title = 'Delete Treatment';
+                        message = `Are you sure you want to delete treatment "${treatment.name}"? This will not affect existing appointments.`;
+                        break;
+                }
+                
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                
+                // Set up the confirm button
+                confirmBtn.onclick = function() {
+                    switch (type) {
+                        case 'patient':
+                            // Remove patient
+                            state.patients = state.patients.filter(p => p.id !== id);
+                            // Remove all appointments for this patient
+                            state.appointments = state.appointments.filter(a => a.patientId !== id);
+                            
+                            renderPatientList();
+                            renderAppointmentTimeline();
+                            updateDashboardStats();
+                            populatePatientDropdown();
+                            break;
+                        case 'appointment':
+                            state.appointments = state.appointments.filter(a => a.id !== id);
+                            renderAppointmentTimeline();
+                            updateDashboardStats();
+                            break;
+                        case 'treatment':
+                            state.treatments = state.treatments.filter(t => t.id !== id);
+                            // For appointments with this treatment, set treatmentId to null
+                            state.appointments.forEach(apt => {
+                                if (apt.treatmentId === id) {
+                                    apt.treatmentId = null;
+                                }
+                            });
+                            
+                            renderTreatmentsList();
+                            renderAppointmentTimeline();
+                            populateTreatmentDropdown();
+                            break;
+                    }
+                    
+                    showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully`, 'success');
+                    closeAllModals();
+                };
+                
+                modal.classList.remove('hidden');
+            }
+
+            // View patient details
+            window.viewPatient = function(patientId) {
+                const patient = state.patients.find(p => p.id === patientId);
+                if (!patient) return;
+                
+                // Update the modal with patient details
+                document.getElementById('viewPatientName').textContent = patient.name;
+                document.getElementById('viewPatientName').dataset.patientId = patient.id;
+                document.getElementById('viewPatientPhone').textContent = patient.phone;
+                document.getElementById('viewPatientEmail').textContent = patient.email;
+                document.getElementById('viewPatientAddress').textContent = patient.address || 'Not provided';
+                
+                // Format date of birth
+                if (patient.dob) {
+                    const dob = new Date(patient.dob);
+                    document.getElementById('viewPatientDOB').textContent = dob.toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                    });
+                } else {
+                    document.getElementById('viewPatientDOB').textContent = 'Not provided';
+                }
+                
+                document.getElementById('viewPatientNotes').textContent = patient.notes || 'No medical notes';
+                
+                // Show patient's appointment history
+                const patientAppointments = state.appointments.filter(apt => apt.patientId === patientId)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort newest first
+                
+                const appointmentsContainer = document.getElementById('viewPatientAppointments');
+                
+                if (patientAppointments.length === 0) {
+                    appointmentsContainer.innerHTML = `<p class="text-sm text-gray-500 dark:text-gray-400">No appointment history</p>`;
+                } else {
+                    appointmentsContainer.innerHTML = patientAppointments.map(apt => {
+                        const treatment = apt.treatmentId ? state.treatments.find(t => t.id === apt.treatmentId) : null;
+                        const aptDate = new Date(apt.date);
+                        const formattedDate = aptDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        
+                        // Check if appointment is past, today, or future
+                        const today = new Date().toISOString().split('T')[0];
+                        let status;
+                        if (apt.date < today) {
+                            status = `<span class="text-xs text-gray-500 dark:text-gray-400">Completed</span>`;
+                        } else if (apt.date === today) {
+                            status = `<span class="text-xs text-green-600 dark:text-green-400">Today</span>`;
+                        } else {
+                            status = `<span class="text-xs text-blue-600 dark:text-blue-400">Upcoming</span>`;
+                        }
+                        
+                        return `
+                            <div class="border-b border-gray-200 dark:border-gray-700 py-2 last:border-0">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <p class="text-sm"><strong>${formattedDate}</strong> at ${formatTime(apt.time)}</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">${treatment ? treatment.name : 'Consultation'}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        ${status}
+                                    </div>
+                                </div>
+                                ${apt.notes ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${apt.notes}</p>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+                
+                // Show the modal
+                document.getElementById('viewPatientModal').classList.remove('hidden');
+            };
+
+            // Edit existing records
+            window.editPatient = function(patientId) {
+                openPatientModal(patientId);
+            };
+
+            window.editAppointment = function(appointmentId) {
+                openAppointmentModal(appointmentId);
+            };
+
+            window.editTreatment = function(treatmentId) {
+                openTreatmentModal(treatmentId);
+            };
+
+            // Utility functions
+            function formatTime(timeString) {
+                const [hours, minutes] = timeString.split(':');
+                const hour = parseInt(hours);
+                const ampm = hour >= 12 ? 'PM' : 'AM';
+                const hour12 = hour % 12 || 12;
+                return `${hour12}:${minutes} ${ampm}`;
+            }
+
+            function formatTimeEnd(timeString, durationMinutes) {
+                const [hours, minutes] = timeString.split(':');
+                const startDate = new Date();
+                startDate.setHours(parseInt(hours), parseInt(minutes), 0);
+                
+                const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+                const hour = endDate.getHours();
+                const ampm = hour >= 12 ? 'PM' : 'AM';
+                const hour12 = hour % 12 || 12;
+                const min = endDate.getMinutes().toString().padStart(2, '0');
+                
+                return `${hour12}:${min} ${ampm}`;
+            }
+
+            function showNotification(message, type) {
+                const notification = document.getElementById('notification');
+                const icon = document.getElementById('notificationIcon');
+                const messageEl = document.getElementById('notificationMessage');
+                
+                // Set icon and color based on type
+                if (type === 'success') {
+                    icon.className = 'fas fa-check-circle text-green-500';
+                    notification.classList.add('bg-green-50', 'dark:bg-green-900', 'dark:bg-opacity-20');
+                    notification.classList.remove('bg-red-50', 'dark:bg-red-900', 'dark:bg-opacity-20');
+                } else if (type === 'error') {
+                    icon.className = 'fas fa-exclamation-circle text-red-500';
+                    notification.classList.add('bg-red-50', 'dark:bg-red-900', 'dark:bg-opacity-20');
+                    notification.classList.remove('bg-green-50', 'dark:bg-green-900', 'dark:bg-opacity-20');
+                }
+                
+                messageEl.textContent = message;
+                
+                // Show notification
+                notification.classList.remove('hidden', 'translate-y-full');
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    notification.classList.add('translate-y-full');
+                    setTimeout(() => {
+                        notification.classList.add('hidden');
+                    }, 300);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
